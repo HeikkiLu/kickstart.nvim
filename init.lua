@@ -102,7 +102,7 @@ vim.g.have_nerd_font = false
 vim.opt.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.opt.relativenumber = true
+vim.opt.relativenumber = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.opt.mouse = 'a'
@@ -238,7 +238,91 @@ vim.opt.rtp:prepend(lazypath)
 --
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
-  -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
+  {
+    'lervag/vimtex',
+    lazy = false, -- Load immediately
+    config = function()
+      vim.g.vimtex_view_method = 'zathura'
+      vim.g.vimtex_quickfix_mode = 0
+      vim.g.vimtex_compiler_method = 'latexmk'
+      vim.g.tex_flavor = 'latex'
+
+      -- Optional forward search settings
+      vim.g.vimtex_view_general_options = '--synctex-forward @line:@col:@tex --unique @pdf'
+      vim.g.vimtex_view_general_viewer = 'zathura'
+    end,
+  },
+
+  {
+    'L3MON4D3/LuaSnip',
+    dependencies = { 'rafamadriz/friendly-snippets' },
+    config = function()
+      require('luasnip.loaders.from_vscode').lazy_load()
+    end,
+  },
+  'folke/twilight.nvim',
+  {
+    'kdheepak/cmp-latex-symbols',
+    ft = 'tex',
+  },
+
+  {
+    'hrsh7th/nvim-cmp',
+    dependencies = {
+      'kdheepak/cmp-latex-symbols',
+    },
+    config = function()
+      local cmp = require 'cmp'
+      cmp.setup {
+        sources = cmp.config.sources({
+          { name = 'nvim_lsp' },
+          { name = 'luasnip' },
+          { name = 'latex_symbols' }, -- Add this here
+        }, {
+          { name = 'buffer' },
+        }),
+      }
+    end,
+  },
+  {
+    'folke/zen-mode.nvim',
+    config = function()
+      local cmp = require 'cmp'
+      require('zen-mode').setup {
+        window = {
+          backdrop = 0.95,
+          width = 120,
+          options = {
+            number = false,
+            relativenumber = false,
+          },
+        },
+        plugins = {
+          options = {
+            enabled = true,
+            ruler = false,
+            showcmd = false,
+            laststatus = 0,
+          },
+          twilight = { enabled = true },
+          gitsigns = { enabled = false },
+          kitty = {
+            enabled = true,
+            font = '+4',
+          },
+        },
+        on_open = function()
+          cmp.setup { enabled = false }
+        end,
+        on_close = function()
+          cmp.setup { enabled = true }
+        end,
+      }
+    end,
+    keys = {
+      { '<leader>z', '<cmd>ZenMode<CR>', desc = 'Toggle Zen Mode' },
+    },
+  }, -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
   'tpope/vim-sleuth', -- Detect tabstop and shiftwidth automatically
 
   -- NOTE: Plugins can also be added by using a table,
